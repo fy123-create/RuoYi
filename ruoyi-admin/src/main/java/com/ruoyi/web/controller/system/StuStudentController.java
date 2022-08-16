@@ -54,7 +54,7 @@ public class StuStudentController extends BaseController
     {
         startPage(); // 此方法配合前端完成自动分页，且只对第一个查询（Select）语句得到的数据进行分页。
         List<StuStudent> list = stuStudentService.selectStuStudentList(stuStudent);
-        return getDataTable(list);
+        return getDataTable(list); // 响应请求分页数据
     }
 
     /**
@@ -69,7 +69,7 @@ public class StuStudentController extends BaseController
     {
         List<StuStudent> list = stuStudentService.selectStuStudentList(stuStudent);
         ExcelUtil<StuStudent> util = new ExcelUtil<StuStudent>(StuStudent.class);
-        return util.exportExcel(list, "学生数据");
+        return util.exportExcel(list, "学生数据");// 对list数据源将其里面的数据导入到excel表单
     }
 
     /**
@@ -91,7 +91,7 @@ public class StuStudentController extends BaseController
     @ResponseBody
     public AjaxResult addSave(StuStudent stuStudent)
     {
-        return toAjax(stuStudentService.insertStuStudent(stuStudent));
+        return toAjax(stuStudentService.insertStuStudent(stuStudent));// 响应返回结果: return rows > 0 ? success() : error();
     }
 
     /**

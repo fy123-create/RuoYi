@@ -5,6 +5,7 @@
 </head>
 <body class="white-bg">
 <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--表单的id值 -> id="form-student-add" -->
     <form class="form-horizontal m" id="form-student-add">
         <div class="form-group">
             <label class="col-sm-3 control-label is-required">姓名：</label>
@@ -54,13 +55,19 @@
 <script th:inline="javascript">
 
     var prefix = ctx + "system/student";
+    // 页面加载后，对表单进行验证 $("#表单id名").validate({}）
     $("#form-student-add").validate({
+        // focusCleanup的默认值是false,如果为true，表示当表单得到焦点时，移除在该表单上的errorClass并隐藏所有错误消息
         focusCleanup: true
     });
 
     function submitHandler() {
+        // $.validate.form() -> 表单验证-默认第一个form
         if ($.validate.form()) {
+            // $.operate.save(url(地址),data(数据),callback(回调函数)) -> 保存信息 刷新表格
+            // $("#form-student-add").serialize() -> serialize()方法通过序列化表单值，创建URL编码文本字符串,把序列化的值传给ajax()作为url的参数
             $.operate.save(prefix + "/add", $("#form-student-add").serialize());
+            // 保存信息 -> url: system/student/add , data: $("#form-student-add").serialize()
         }
     }
 

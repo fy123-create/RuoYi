@@ -33,7 +33,7 @@
                                 <option value="" name="sex" selected>--请选择--</option>
                                 <option value="男" name="sex">男</option>
                                 <option value="女" name="sex">女</option>
-                                <!--                                    <option value="私密" name="sex">私密</option>-->
+                                <!-- <option value="私密" name="sex">私密</option> -->
                             </select>
                         </li>
 
@@ -49,6 +49,8 @@
         </div>
 
         <div class="btn-group-sm" id="toolbar" role="group">
+            <!-- shiro:hasPermission="system:student:add" : 包含权限字符串才能看到 -->
+            <!-- 操作table.options.createUrl地址 -> $.operate.edit()  -->
             <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="system:student:add">
                 <i class="fa fa-plus"></i> 添加
             </a>
@@ -60,7 +62,7 @@
                shiro:hasPermission="system:student:remove">
                 <i class="fa fa-remove"></i> 删除
             </a>
-            <!--             添加导出按钮事件-->
+            <!-- 添加导出按钮事件-->
             <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="system:student:export">
                 <i class="fa fa-download"></i> 导出
             </a>
@@ -83,24 +85,33 @@
 <th:block th:include="include :: footer"/>
 <!-- js 代码中可以获取到后台传递页面的对象-->
 <script th:inline="javascript">
+    // 在JS中使用权限,使用封装方法
+    // hasPermi : 验证用户是否具备某权限
+    /**
+     * 在JS中使用参数，使用封装方法
+     * var skinName = [[${@config.getKey('sys.index.skinName')}]];
+     * $("#id").val(skinName);
+     */
     var editFlag = [[${@permission.hasPermi('system:student:edit')}]];
     var removeFlag = [[${@permission.hasPermi('system:student:remove')}]];
     var prefix = ctx + "system/student";
 
     $(function () {
+        // options : 当前实例配置,初始为{}
         var options = {
-            url: prefix + "/list",
-            createUrl: prefix + "/add",
-            updateUrl: prefix + "/edit/{id}",
-            removeUrl: prefix + "/remove",
-            exportUrl: prefix + "/export",//前端调用封装好的方法$.table.init，传入后台exportUrl
-            modalName: "学生",
-            columns: [{ // 列
+            url: prefix + "/list", // 请求后台的URL：
+            // createUrl : 弹框调用的方法地址，比如添加、编辑时需要调用页面表单地址的方法
+            createUrl: prefix + "/add", // 新增URL 配合使用 $.operate.add()，$.operate.addTab()
+            updateUrl: prefix + "/edit/{id}", //  修改URL 配合使用 $.operate.edit()，$.operate.editTab()
+            removeUrl: prefix + "/remove", // 删除URL 配合使用 $.operate.remove()
+            exportUrl: prefix + "/export", // 导出URL 配合使用 $.table.exportExcel(),前端调用封装好的方法$.table.init，传入后台exportUrl
+            modalName: "学生", // table.options.modalName : 弹窗标题
+            columns: [{ // 默认空数组，在JS里面定义 参考列的各项(Column options )
                 checkbox: true //为true时,有复选框
             },
                 {
-                    field: 'id',
-                    title: '编号',
+                    field: 'id', // 字段名
+                    title: '编号', // 表头所显示的名字
                     visible: false //visible:false或者true:隐藏或显示列
                 },
                 {
@@ -118,11 +129,15 @@
                 {
                     title: '操作',
                     align: 'center',
-                    formatter: function (value, row, index) {//状态字段在数据库中是0/1 可以通过formatter转换成 启用/停用 这样的文字显示而不是显示0或者1
+                    formatter: function (value, row, index) {// 某格的数据转换函数，需要三个参数： -value： field（字段名） -row：行的数据 -index：行的（索引）index
+                        //状态字段在数据库中是0/1 可以通过formatter转换成 启用/停用 这样的文字显示而不是显示0或者1
                         var actions = [];
                         // actions.push -> 字符串拼接（向数组末尾添加一个或多个元素）
                         // $.operate.edit -> 修改信息
                         // $.operate.remove -> 删除信息
+
+                        // 追加标识可以实现隐藏
+                        // <a class="btn btn-success btn-xs ' + permission + '">包含权限字符串才能看到</a>
                         actions.push('<a class="btn btn-success btn-xs ' + editFlag
                             + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')">'
                             + '<i class="fa fa-edit"></i>编辑</a> ');
@@ -133,7 +148,7 @@
                     }
                 }]
         };
-        $.table.init(options);// 初始化 Bootstrap-Table
+        $.table.init(options);// 初始化 Bootstrap-Table,初始化表格参数
     });
 </script>
 </body>

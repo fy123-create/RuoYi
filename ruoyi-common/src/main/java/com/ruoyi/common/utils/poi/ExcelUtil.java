@@ -218,10 +218,10 @@ public class ExcelUtil<T>
         this.sheetName = sheetName;
         this.type = type;
         this.title = title;
-        createExcelField();
-        createWorkbook();
-        createTitle();
-        createSubHead();
+        createExcelField();// 得到所有定义字段
+        createWorkbook();// 创建一个工作簿
+        createTitle();// 创建excel第一行标题
+        createSubHead();// 创建对象的子列表名称
     }
 
     /**

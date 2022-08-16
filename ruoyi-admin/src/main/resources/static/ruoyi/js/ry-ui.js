@@ -865,6 +865,8 @@ var table = {
                 if ($.common.isEmpty(callback)) {
                     callback = function(index, layero) {
                         var iframeWin = layero.find('iframe')[0];
+                        // 在使用iframe的页面时，要操作这个iframe里面的DOM元素可以用：contentWindow、contentDocument
+                        // layui弹出层按钮回调参数：index是弹出框的索引，layero是包含弹出框信息的对象
                         iframeWin.contentWindow.submitHandler(index, layero);
                     }
                 }
@@ -881,10 +883,13 @@ var table = {
                     // 弹层外区域关闭
                     shadeClose: true,
                     yes: callback,
+                    // index -> 弹出框的索引
                     cancel: function(index) {
                         return true;
                     },
                     success: function () {
+                        // 触发被选元素的blur事件 -> 当元素失去焦点时发生 blur 事件
+                        // :focus -> 用于选取获得焦点的元素
                         $(':focus').blur();
                     }
                 });
@@ -1128,6 +1133,7 @@ var table = {
             // 添加信息
             add: function(id) {
                 table.set();
+                // $.modal.open("标题内容", url); 调用弹窗功能-添加信息
                 $.modal.open("添加" + table.options.modalName, $.operate.addUrl(id));
             },
             // 添加信息，以tab页展现
@@ -1142,6 +1148,7 @@ var table = {
             },
             // 添加访问地址
             addUrl: function(id) {
+                // $.common.isEmpty(id) : 判断字符串是否为空,null," ",undefined,"undefined"的结果为 true，其它为false
                 var url = $.common.isEmpty(id) ? table.options.createUrl.replace("{id}", "") : table.options.createUrl.replace("{id}", id);
                 return url;
             },
@@ -1204,21 +1211,30 @@ var table = {
             // 保存信息 刷新表格
             save: function(url, data, callback) {
                 var config = {
+                    // 当前页地址。发送请求的地址。
                     url: url,
+                    // 默认情况下，Ajax 请求使用 GET 方法。如果要使用 POST 方法，可以设定 type 参数值。这个选项也会影响 data 选项中的内容如何发送到服务器。
                     type: "post",
+                    // 类型：String , 预期服务器返回的数据类型
                     dataType: "json",
+                    // 类型：String , 发送到服务器的数据
                     data: data,
+                    // 发送请求前可修改 XMLHttpRequest 对象的函数，如添加自定义 HTTP 头,如果返回 false 可以取消本次 ajax 请求 -> 这是一个 Ajax 事件
                     beforeSend: function () {
                         $.modal.loading("正在处理中，请稍候...");
                         $.modal.disable();
                     },
+                    // 请求成功后的回调函数,参数：由服务器返回，并根据 dataType 参数进行处理后的数据；描述状态的字符串  -> 这是一个 Ajax 事件
                     success: function(result) {
                         if (typeof callback == "function") {
                             callback(result);
                         }
+                        // 成功回调执行事件（静默更新）
                         $.operate.successCallback(result);
                     }
                 };
+                //ajax()方法 -> 通过 HTTP 请求加载远程数据
+                // config -> 用于配置 Ajax 请求的键值对集合
                 $.ajax(config)
             },
             // 保存信息 弹出结果提示框
