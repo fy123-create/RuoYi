@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('学生列表')"/>
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <label>姓名：</label>
+                            <input type="text" name="name" id="name" maxlength="5" placeholder="请输入中文汉字,长度1-5"
+                                   class="form-control"
+                                   required
+                                   onkeyup="value=value.replace(/[^\u4e00-\u9fa5]/g,'')"/>
+                        </li>
+
+                        <li>
+                            <label>年龄：</label>
+                            <input type="text" name="age" id="age" maxlength="3" class="form-control"
+                                   placeholder="请输入数字,大小1-120"
+                                   required
+                                   oninput='this.value=this.value.replace(/^[0]+[0-9]*$/gi,"")'/>
+                        </li>
+
+                        <li>
+                            <label>性别：</label>
+                            <select placeholder id="sex" name="sex" th:maxlength="1" class="form-control" type="text"
+                                    required>
+                                <option value="" name="sex" selected>--请选择--</option>
+                                <option value="男" name="sex">男</option>
+                                <option value="女" name="sex">女</option>
+                                <!--                                    <option value="私密" name="sex">私密</option>-->
+                            </select>
+                        </li>
+
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="system:student:add">
+                <i class="fa fa-plus"></i> 添加
+            </a>
+            <a class="btn btn-primary single disabled" onclick="$.operate.edit()"
+               shiro:hasPermission="system:student:edit">
+                <i class="fa fa-edit"></i> 修改
+            </a>
+            <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+               shiro:hasPermission="system:student:remove">
+                <i class="fa fa-remove"></i> 删除
+            </a>
+            <!--             添加导出按钮事件-->
+            <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="system:student:export">
+                <i class="fa fa-download"></i> 导出
+            </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+    </div>
+</div>
+
+<!--
+语法说明  "::"前面是模板文件名，后面是选择器
+<div th:include="template/footer::copy"></div>
+只写选择器，这里指fragment名称，则加载本页面对应的fragment
+<div th:include="::#thispage"></div>
+只写模板文件名，则加载整个页面
+<div th:include="template/footer"></div>
+-->
+<!--     th:block：创建区域块（内容为空则不创建），之后th:block标签消失-->
+<th:block th:include="include :: footer"/>
+<!-- js 代码中可以获取到后台传递页面的对象-->
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('system:student:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('system:student:remove')}]];
+    var prefix = ctx + "system/student";
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",//前端调用封装好的方法$.table.init，传入后台exportUrl
+            modalName: "学生",
+            columns: [{ // 列
+                checkbox: true //为true时,有复选框
+            },
+                {
+                    field: 'id',
+                    title: '编号',
+                    visible: false //visible:false或者true:隐藏或显示列
+                },
+                {
+                    field: 'name',
+                    title: '姓名'
+                },
+                {
+                    field: 'age',
+                    title: '年龄'
+                },
+                {
+                    field: 'sex',
+                    title: '性别'
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {//状态字段在数据库中是0/1 可以通过formatter转换成 启用/停用 这样的文字显示而不是显示0或者1
+                        var actions = [];
+                        // actions.push -> 字符串拼接（向数组末尾添加一个或多个元素）
+                        // $.operate.edit -> 修改信息
+                        // $.operate.remove -> 删除信息
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag
+                            + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')">'
+                            + '<i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag
+                            + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')">'
+                            + '<i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');// 把数组中的所有元素转换一个字符串
+                    }
+                }]
+        };
+        $.table.init(options);// 初始化 Bootstrap-Table
+    });
+</script>
+</body>
+</html>
